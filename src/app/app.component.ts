@@ -1,5 +1,11 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
+
+type Iframe = {
+  url: string
+  safeUrl: SafeResourceUrl
+}
 
 @Component({
   selector: 'app-root',
@@ -20,13 +26,19 @@ export class AppComponent implements OnInit {
   previousPacket?: [number, number];
   prevString?: string;
 
-  iframes: string[] = [];
+  iframes: Iframe[] = [];
 
   sentMacros: boolean[] = [];
   macroMap = [
     5, // Dump cycle
     6, // Dig cycle
   ];
+
+  constructor(public sanitizer: DomSanitizer) {}
+
+  // ngOnInit() {
+  //   this.urlSafe = this.sanitizer.bypassSecurityTrustResourceUrl(this.url);
+  // }
 
   ngOnInit() {
     window.addEventListener('gamepadconnected', (e) => {
@@ -191,14 +203,19 @@ export class AppComponent implements OnInit {
   }
 
   addIFrame(): void {
-    this.iframes.push(
-      `http://10.49.28.131:8889/mystream${this.iframes.length || ''}`
-    );
+    const defaultUrl = `http://10.49.28.131:8889/mystream${this.iframes.length || ''}`;
+    this.iframes.push({
+      url: defaultUrl, 
+      safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(defaultUrl)
+    });
   }
 
   editIFrame(event: KeyboardEvent, index: number): void {
     let value = (event.target as HTMLInputElement).value;
-    this.iframes[index] = value;
+    this.iframes[index] = {
+      url: value, 
+      safeUrl: this.sanitizer.bypassSecurityTrustResourceUrl(value)
+    }
   }
 
   removeIFrame(index: number): void {

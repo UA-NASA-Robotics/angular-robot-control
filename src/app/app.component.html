@@ -1,7 +1,7 @@
 <main class="main" style="display: flex; flex-direction: row;">
   <div style="flex: 1; flex-direction: column;">
     <p>{{statusText}}</p>
-    <input #urlInput placeholder="Enter address" />
+    <input #urlInput placeholder="Enter address" [defaultValue]="'ws://192.168.1.141:9002'" />
     <button (click)="connect()">Connect</button>
     <button (click)="disconnect()">Disconnect</button>
     <p>{{prevString}}</p>
@@ -26,17 +26,18 @@
     }
   </div>
 
-  <div style="flex: 1; flex-direction: column; height: calc(100vh - 50px);">
+  <div #iframeContainer style="flex: 1; flex-direction: column; height: calc(100vh - 50px);">
     <button (click)="addIFrame()">+</button>
     <p></p>
     @for (frame of iframes; track $index) {
-      <input placeholder="Enter URL" style="width: 70%" (keyup)="editIFrame($event, $index)" />
+      <input placeholder="Enter URL" style="width: 70%" [defaultValue]="frame.url" (keyup)="editIFrame($event, $index)" />
       <button (click)="removeIFrame($index)">X</button>
-      <p>{{frame}}</p>
+      <p></p>
       <iframe
-        [src]="frame"
+        [src]="frame.safeUrl"
         [title]="'Frame ' + $index"
-        style="height: 90vh"
+        style="width: 100%"
+        [style.height.px]="iframeContainer.offsetHeight / iframes.length - 50"
       ></iframe>
     }
   </div>
